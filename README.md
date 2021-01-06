@@ -1,6 +1,6 @@
 ### This is my custom LinearRegression 😎
 
-코드는 다음과 같이 쓸 수 있다.
+다음과 같이 사용할 수 있다
 --------------------
 
 ``` python
