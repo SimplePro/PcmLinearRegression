@@ -1,17 +1,84 @@
 ### This is my custom LinearRegression 😎
 
-기술 설명
+설명
 ------------
-먼저 학습을 시작하기 전에 데이터들을 전처리한다. (preprocessing)
+1. 먼저 학습을 시작하기 전에 데이터들을 전처리한다. (preprocessing)
 - x 값이 비슷한 y 값들끼리의 평균값을 구한다.  
+``` python
+self.data = list(zip(X, y))
+        self.data = np.sort(self.data)
+        self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
-전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
-- 증가량으로 기울기를 구한다.  
+        def duplicate(x):
+            duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
+            return sum(duplicate_data) / len(duplicate_data)
 
-절편은 첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값 을 하여 구할 수 있다.  
+        self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
+        self.data = self.data.drop_duplicates(["y"], keep="first")
+        self.data = self.data.reset_index(drop=True)
+```
 
-그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.  
-  
+2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
+- 증가량으로 기울기를 구한다.
+``` python
+for i in range(self.data.shape[0]):
+            try:
+                up.append((self.data.iloc[i, 1] - self.data.iloc[i + self.uprate, 1]) / (
+                        self.data.iloc[i, 0] - self.data.iloc[i + self.uprate, 0]))
+            except:
+                pass
+
+        for i in reversed(range(self.data.shape[0])):
+            try:
+                up.append((self.data.iloc[i, 1] - self.data.iloc[i - self.uprate, 1]) / (
+                        self.data.iloc[i, 0] - self.data.iloc[i - self.uprate, 0]))
+            except:
+                pass
+
+        # 기울기 구하기
+        self.a = sum(up) / len(up)
+```
+
+
+3. 절편은 첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값 을 하여 구할 수 있다.  
+``` python
+# 절편 구하기
+self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
+```
+
+그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
+``` python
+# 정보
+    def info(self, ifpr=True):
+        if ifpr:
+            print(f"y = {self.a}x + ({self.b})")
+        return self.a, self.b
+```
+
+4. X 값과 y 값으로 평가 그래프를 그릴 수 있다.
+``` python
+def evaluation_graph(self, X, y):
+        plt.scatter(X, y, label="original")
+        plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
+
+        pred = self.predict(self.data.iloc[:, 0])
+        plt.plot(self.data.iloc[:, 0], pred, color="yellow", label="predict")
+
+        plt.legend()
+
+        plt.show()
+```
+
+5. 예측은 predict 메소드를 이용하여 할 수 있다.
+``` python
+# 예측
+    def predict(self, X):
+        y_pred = []
+        for i in X:
+            y_pred.append(self.a * i + self.b)
+        return y_pred
+```
+
   
 다음과 같이 사용할 수 있다
 --------------------
