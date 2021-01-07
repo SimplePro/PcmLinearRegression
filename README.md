@@ -50,23 +50,23 @@ self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
 ``` python
 # 정보
 def info(self, ifpr=True):
-        if ifpr:
-                print(f"y = {self.a}x + ({self.b})")
-        return self.a, self.b
+    if ifpr:
+        print(f"y = {self.a}x + ({self.b})")
+    return self.a, self.b
 ```
 
 4. X 값과 y 값으로 평가 그래프를 그릴 수 있다.
 ``` python
 def evaluation_graph(self, X, y):
-        plt.scatter(X, y, label="original")
-        plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
+    plt.scatter(X, y, label="original")
+    plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
 
-        pred = self.predict(self.data.iloc[:, 0])
-        plt.plot(self.data.iloc[:, 0], pred, color="yellow", label="predict")
+    pred = self.predict(self.data.iloc[:, 0])
+    plt.plot(self.data.iloc[:, 0], pred, color="yellow", label="predict")
 
-        plt.legend()
+    plt.legend()
 
-        plt.show()
+    plt.show()
 ```
 
 5. 예측은 predict 메소드를 이용하여 할 수 있다.
