@@ -2,7 +2,7 @@
 
 설명
 ------------
-1. 먼저 학습을 시작하기 전에 데이터들을 전처리한다. (preprocessing)
+#### 1. 먼저 학습을 시작하기 전에 데이터들을 전처리한다. (preprocessing)
 - x 값이 비슷한 y 값들끼리의 평균값을 구한다.  
 ``` python
 self.data = list(zip(X, y))
@@ -18,7 +18,7 @@ self.data = self.data.drop_duplicates(["y"], keep="first")
 self.data = self.data.reset_index(drop=True)
 ```
 
-2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
+#### 2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
 - 증가량으로 기울기를 구한다.
 ``` python
 for i in range(self.data.shape[0]):
@@ -40,13 +40,13 @@ self.a = sum(up) / len(up)
 ```
 
 
-3. 절편은 첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값 을 하여 구할 수 있다.  
+#### 3. 절편은 첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값 을 하여 구할 수 있다.  
 ``` python
 # 절편 구하기
 self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
 ```
 
-그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
+#### 그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
 ``` python
 # 정보
 def info(self, ifpr=True):
@@ -55,7 +55,7 @@ def info(self, ifpr=True):
     return self.a, self.b
 ```
 
-4. X 값과 y 값으로 평가 그래프를 그릴 수 있다.
+#### 4. X 값과 y 값으로 평가 그래프를 그릴 수 있다.
 ``` python
 def evaluation_graph(self, X, y):
     plt.scatter(X, y, label="original")
@@ -73,7 +73,7 @@ def evaluation_graph(self, X, y):
 <img width="500" alt="evaluation_graph_img" src="https://user-images.githubusercontent.com/66504341/103880075-ff0de680-511b-11eb-8d5c-d9ba8cf9c559.PNG">
 </div>
 
-5. 예측은 predict 메소드를 이용하여 할 수 있다.
+#### 5. 예측은 predict 메소드를 이용하여 할 수 있다.
 ``` python
 # 예측
 def predict(self, X):
