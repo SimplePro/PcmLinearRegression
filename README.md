@@ -4,94 +4,102 @@
 --------------------
 
 ``` python
+# 임포트
+from CustomML.CustomRegression import CustomLinearRegression
+
 # 생성
-linearRegression = CustomLinearRegression()
+lr_model = CustomLinearRegression()
 
 # 학습
-linearRegression.fit(heights, weights, 10000)
-
-# 예측 값
-pred = linearRegression.predict(heights)
-
-# 정확도
-accuracy = linearRegression.evaluation(weights, pred)
+lr_model.fit(heights, weights)
 
 # 실제 값의 분포와 선형회귀를 그래프로 표현.
-linearRegression.evaluation_graph(heights, weights, pred)
+lr_model.evaluation_graph(heights, weights)
 ```
 
 전체코드
 -----------
 
 ``` python
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
 class CustomLinearRegression():
-    def __init__(self):
-        self.a = 0  # x 의 계수
+    def __init__(self, up_rate=10):
+        self.a = 0  # 기울기
         self.b = 0  # y 절편
-        self.x_average = 0  # x 값 평균
-        self.y_average = 0  # y 값 평균
-        self.x_dispersion = 0  # x 값 분산
-        self.y_dispersion = 0  # y 값 분산
-        self.r = 0  # 상관계수
-        
-    # 학습
-    def fit(self, X=None, y=None, d_len=None):
+        self.data = None  # X, y 데이터프레임
+        self.uprate = up_rate  # 증가량 
+
+    def fit(self, X=None, y=None):
         if X is None or y is None:
             raise Exception("x and y cannot be None.")
-        if d_len is None:
-            raise Exception("shape cannot be None.")
-        self.fit_logic(X, y, d_len)
-            
-    # 학습 로직
-    def fit_logic(self, X, y, d_len):
-        ## 평균 구하기
-        self.x_average = sum(X) / d_len
-        self.y_average = sum(y) / d_len
-        
-        ## 표준편차 구하기
-        for i in X:
-            self.x_dispersion += (i - self.x_average)** 2
-        self.x_dispersion = np.sqrt(self.x_dispersion / d_len)
-        
-        for i in y:
-            self.y_dispersion += (i - self.y_average)** 2
-        self.y_dispersion = np.sqrt(self.y_dispersion / d_len)
-    
-        ## 상관계수 구하기
-        r = 0
-        for x_d, y_d in zip(X, y):
-            r += ((x_d - self.x_average) / self.x_dispersion) * ((y_d - self.y_average) / self.y_dispersion)
-        r = r / d_len - 1
-        
-        ## 기울기
-        self.a = r * self.y_dispersion / self.x_dispersion
-        
-        ## 절편
-        self.b = abs(self.a * self.x_average - self.y_average)
-    
-    # 예측
-    def predict(self, x):
-        pred = np.array([])
+        if not isinstance(X, np.ndarray) or not isinstance(y, np.ndarray):
+            raise Exception("X and y should be ndarray")
+        if len(X) != len(y):
+            raise Exception("X length and y length cannot be different")
+        self.fit_logic(X, y)
 
-        for i in x:
-            pred = np.append(pred, [b1 * i + b0])
-        pred *= 0.1
-        return pred
-    
-    # 평가
-    def evaluation(self, y, pred):
-        accuracy_list = []
-        for r, p in zip(y, pred):
-            accuracy_list.append(1 - abs(r - p))
-        accuracy = abs(sum(accuracy_list) / len(accuracy_list))
-        return accuracy
-    
-    # 선형회귀와 데이터의 그래프를 그려주는 함수.
-    def evaluation_graph(self, X, y, pred, sca_col="red", pre_col="blue"):
-        try:
-            plt.scatter(heights, weights, color=sca_col)
-            plt.plot(heights, y_pred, color=pre_col)
-        except:
-            raise Exception("import matplotlib.pyplot as plt")
+    # 학습
+    def fit_logic(self, X, y):
+        up = []  # 데이터마다 증가량에 따른 기울기를 담는 리스트.
+
+        self.data = list(zip(X, y))
+        self.data = np.sort(self.data)
+        self.data = pd.DataFrame(self.data, columns=["X", "y"])
+
+        def duplicate(x):
+            duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
+            return sum(duplicate_data) / len(duplicate_data)
+
+        self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
+        self.data = self.data.drop_duplicates(["y"], keep="first")
+        self.data = self.data.reset_index(drop=True)
+
+        for i in range(self.data.shape[0]):
+            try:
+                up.append((self.data.iloc[i, 1] - self.data.iloc[i + self.uprate, 1]) / (
+                        self.data.iloc[i, 0] - self.data.iloc[i + self.uprate, 0]))
+            except:
+                pass
+
+        for i in reversed(range(self.data.shape[0])):
+            try:
+                up.append((self.data.iloc[i, 1] - self.data.iloc[i - self.uprate, 1]) / (
+                        self.data.iloc[i, 0] - self.data.iloc[i - self.uprate, 0]))
+            except:
+                pass
+
+        # 기울기 구하기
+        self.a = sum(up) / len(up)
+
+        # 절편 구하기
+        self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
+
+    # 예측
+    def predict(self, X):
+        y_pred = []
+        for i in X:
+            y_pred.append(self.a * i + self.b)
+        return y_pred
+
+    # 정보
+    def info(self, ifpr=True):
+        if ifpr:
+            print(f"y = {self.a}x + ({self.b})")
+        return self.a, self.b
+
+    def evaluation_graph(self, X, y):
+        plt.scatter(X, y, label="original")
+        plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
+
+        pred = self.predict(self.data.iloc[:, 0])
+        plt.plot(self.data.iloc[:, 0], pred, color="yellow", label="predict")
+
+        plt.legend()
+
+        plt.show()
 ```
 
