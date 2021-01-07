@@ -6,37 +6,37 @@
 - x 값이 비슷한 y 값들끼리의 평균값을 구한다.  
 ``` python
 self.data = list(zip(X, y))
-        self.data = np.sort(self.data)
-        self.data = pd.DataFrame(self.data, columns=["X", "y"])
+self.data = np.sort(self.data)
+self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
-        def duplicate(x):
-            duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
-            return sum(duplicate_data) / len(duplicate_data)
+def duplicate(x):
+    duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
+    return sum(duplicate_data) / len(duplicate_data)
 
-        self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
-        self.data = self.data.drop_duplicates(["y"], keep="first")
-        self.data = self.data.reset_index(drop=True)
+self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
+self.data = self.data.drop_duplicates(["y"], keep="first")
+self.data = self.data.reset_index(drop=True)
 ```
 
 2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
 - 증가량으로 기울기를 구한다.
 ``` python
 for i in range(self.data.shape[0]):
-            try:
-                up.append((self.data.iloc[i, 1] - self.data.iloc[i + self.uprate, 1]) / (
-                        self.data.iloc[i, 0] - self.data.iloc[i + self.uprate, 0]))
-            except:
-                pass
+    try:
+        up.append((self.data.iloc[i, 1] - self.data.iloc[i + self.uprate, 1]) / (
+                self.data.iloc[i, 0] - self.data.iloc[i + self.uprate, 0]))
+    except:
+        pass
 
-        for i in reversed(range(self.data.shape[0])):
-            try:
-                up.append((self.data.iloc[i, 1] - self.data.iloc[i - self.uprate, 1]) / (
-                        self.data.iloc[i, 0] - self.data.iloc[i - self.uprate, 0]))
-            except:
-                pass
+for i in reversed(range(self.data.shape[0])):
+    try:
+        up.append((self.data.iloc[i, 1] - self.data.iloc[i - self.uprate, 1]) / (
+                self.data.iloc[i, 0] - self.data.iloc[i - self.uprate, 0]))
+    except:
+        pass
 
-        # 기울기 구하기
-        self.a = sum(up) / len(up)
+# 기울기 구하기
+self.a = sum(up) / len(up)
 ```
 
 
@@ -49,9 +49,9 @@ self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
 그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
 ``` python
 # 정보
-    def info(self, ifpr=True):
+def info(self, ifpr=True):
         if ifpr:
-            print(f"y = {self.a}x + ({self.b})")
+                print(f"y = {self.a}x + ({self.b})")
         return self.a, self.b
 ```
 
@@ -72,11 +72,11 @@ def evaluation_graph(self, X, y):
 5. 예측은 predict 메소드를 이용하여 할 수 있다.
 ``` python
 # 예측
-    def predict(self, X):
-        y_pred = []
-        for i in X:
-            y_pred.append(self.a * i + self.b)
-        return y_pred
+def predict(self, X):
+    y_pred = []
+    for i in X:
+        y_pred.append(self.a * i + self.b)
+    return y_pred
 ```
 
   
