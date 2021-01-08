@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-class CustomLinearRegression():
+class PimLinearRegression():
     def __init__(self, up_rate=10):
         self.a = 0  # 기울기
         self.b = 0  # y 절편
