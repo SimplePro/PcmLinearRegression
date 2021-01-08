@@ -90,10 +90,10 @@ def predict(self, X):
 
 ``` python
 # 임포트
-from CustomML.CustomRegression import PIMLinearRegression
+from CustomML.CustomRegression import PimLinearRegression
 
 # 생성
-lr_model = PIMLinearRegression()
+lr_model = PimLinearRegression()
 
 # 학습
 lr_model.fit(heights, weights)
