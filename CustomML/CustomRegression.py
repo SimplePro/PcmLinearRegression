@@ -24,7 +24,6 @@ class PimLinearRegression():
         up = []  # 데이터마다 증가량에 따른 기울기를 담는 리스트.
 
         self.data = list(zip(X, y))
-        self.data = np.sort(self.data)
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
         def duplicate(x):
