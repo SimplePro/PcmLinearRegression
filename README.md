@@ -7,7 +7,6 @@
 - x 값이 비슷한 y 값들끼리의 평균값을 구한다.  
 ``` python
 self.data = list(zip(X, y))
-self.data = np.sort(self.data)
 self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
 def duplicate(x):
@@ -132,7 +131,6 @@ class PIMLinearRegression():
         up = []  # 데이터마다 증가량에 따른 기울기를 담는 리스트.
 
         self.data = list(zip(X, y))
-        self.data = np.sort(self.data)
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
         def duplicate(x):
