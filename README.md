@@ -1,4 +1,5 @@
-### This is my custom LinearRegression 😎
+### PIM LinearRegression (Point Inclination Mean) - 점경사평균법
+-------------
 
 설명
 ------------
