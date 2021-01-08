@@ -18,7 +18,7 @@ self.data = self.data.drop_duplicates(["y"], keep="first")
 self.data = self.data.reset_index(drop=True)
 ```
 
-#### 2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 측정하여 증가량의 평균을 구한다.
+#### 2. 전처리한 데이터에서 up_rate 을 기준으로 증가량을 이용하여 기울기를 측정하고 기울기의 평균을 구한다.
 - 증가량으로 기울기를 구한다.
 ``` python
 for i in range(self.data.shape[0]):
