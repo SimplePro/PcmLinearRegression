@@ -71,7 +71,6 @@ def evaluation_graph(self, X, y):
 ```
 
 <div>
-![image](https://user-images.githubusercontent.com/66504341/106843303-12937980-66e9-11eb-9903-37af7c4ab149.png)
 <img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/106843303-12937980-66e9-11eb-9903-37af7c4ab149.png"></img>
 </div>
 
