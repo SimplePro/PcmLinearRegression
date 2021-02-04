@@ -40,7 +40,7 @@ self.a = round(sum(up) / len(up), 3)
 ```
 
 
-#### 3. 절편은 (첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값) 을 하여 구할 수 있다.  
+#### 3. 절편은 y 값과 예측값의 차이의 평균으로 구할 수 있다.
 ``` python
 # 절편 구하기
 b_lst = self.data.iloc[:, 1] - (self.a * self.data.iloc[:, 0])
