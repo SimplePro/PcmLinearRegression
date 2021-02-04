@@ -10,7 +10,7 @@ self.data = list(zip(X, y))
 self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
 def duplicate(x):
-    duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
+    duplicate_data = self.data[(self.data["X"] > (x - self.dp)) & (self.data["X"] < (x + self.dp))]["y"]
     return sum(duplicate_data) / len(duplicate_data)
 
 self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
@@ -36,14 +36,15 @@ for i in reversed(range(self.data.shape[0])):
         pass
 
 # 기울기 구하기
-self.a = sum(up) / len(up)
+self.a = round(sum(up) / len(up), 3)
 ```
 
 
 #### 3. 절편은 (첫번째 x 값에 대한 예측값 - 첫번째 x 값에 대한 y 값) 을 하여 구할 수 있다.  
 ``` python
 # 절편 구하기
-self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
+b_lst = self.data.iloc[:, 1] - (self.a * self.data.iloc[:, 0])
+self.b = round(sum(b_lst) / len(b_lst), 3)
 ```
 
 #### 그렇게 y = ax + b 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
@@ -110,12 +111,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-class PIMLinearRegression():
-    def __init__(self, up_rate=10):
+class PimLinearRegression():
+    def __init__(self, up_rate=10, dp=0.1):
+        if up_rate is None:
+            raise Exception("up_rate must not be None.")
+        if dp is None:
+            raise Exception("dp must not be None.")
+        
         self.a = 0  # 기울기
         self.b = 0  # y 절편
         self.data = None  # X, y 데이터프레임
         self.uprate = up_rate  # 증가량 
+        self.dp = dp  # 데이터 전처리 단위
 
     def fit(self, X=None, y=None):
         if X is None or y is None:
@@ -134,7 +141,7 @@ class PIMLinearRegression():
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
         def duplicate(x):
-            duplicate_data = self.data[(self.data["X"] > (x - 0.1)) & (self.data["X"] < (x + 0.1))]["y"]
+            duplicate_data = self.data[(self.data["X"] > (x - self.dp)) & (self.data["X"] < (x + self.dp))]["y"]
             return sum(duplicate_data) / len(duplicate_data)
 
         self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
@@ -156,10 +163,11 @@ class PIMLinearRegression():
                 pass
 
         # 기울기 구하기
-        self.a = sum(up) / len(up)
+        self.a = round(sum(up) / len(up), 3)
 
         # 절편 구하기
-        self.b = self.data.iloc[0, 1] - (self.a * self.data.iloc[0, 0])
+        b_lst = self.data.iloc[:, 1] - (self.a * self.data.iloc[:, 0])
+        self.b = round(sum(b_lst) / len(b_lst), 3)
 
     # 예측
     def predict(self, X):
