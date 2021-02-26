@@ -3,19 +3,23 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from derivative_pattern import Functions
 
+# 학습 로직
+# 1. random 하게 데이터를 선택하고 계수를 예측한다. 이 과정을 epoch 만큼 반복
+# 2. 나온 계수들의 평균을 구한다.
 
 # degree 가 1일 때 model 예측하는 클래스
 class PimDegree1:
-    def __init__(self, up_rate=10, dp=0.1):
-        if up_rate is None:
-            raise Exception("up_rate must not be None.")
+    def __init__(self, epoch=1000, dp=0.1):
+        if epoch is None:
+            raise Exception("epoch must not be None.")
+
         if dp is None:
             raise Exception("dp must not be None.")
 
         self.a = 0  # 기울기
         self.b = 0  # y 절편
         self.data = None  # X, y 데이터프레임
-        self.uprate = up_rate  # 증가량
+        self.epoch = epoch  # 반복 횟수
         self.dp = dp  # 데이터 전처리 단위
 
     def fit(self, X=None, y=None):
@@ -45,19 +49,10 @@ class PimDegree1:
         self.data = self.data.drop_duplicates(["y"], keep="first")
         self.data = self.data.reset_index(drop=True)
 
-        for i in range(self.data.shape[0]):
-            try:
-                up.append((self.data.iloc[i, 1] - self.data.iloc[i + self.uprate, 1]) / (
-                        self.data.iloc[i, 0] - self.data.iloc[i + self.uprate, 0]))
-            except:
-                pass
-
-        for i in reversed(range(self.data.shape[0])):
-            try:
-                up.append((self.data.iloc[i, 1] - self.data.iloc[i - self.uprate, 1]) / (
-                        self.data.iloc[i, 0] - self.data.iloc[i - self.uprate, 0]))
-            except:
-                pass
+        for i in range(self.epoch):
+            sample_xy = self.data.sample(n=2)
+            sample_xy = sorted([xy for xy in list(zip(sample_xy.iloc[:, 0].tolist(), sample_xy.iloc[:, 1].tolist()))], key=lambda x: x[0])
+            up.append((sample_xy[0][1] - sample_xy[1][1]) / (sample_xy[0][0] - sample_xy[1][0]))
 
         # 기울기 구하기
         self.a = round(sum(up) / len(up), 3)
@@ -77,6 +72,7 @@ class PimDegree1:
     def info(self, ifpr=True):
         if ifpr:
             print(f"y = {self.a}x + ({self.b})")
+
         return self.a, self.b
 
     def evaluation_graph(self, X, y):
@@ -94,9 +90,9 @@ class PimDegree1:
 # degree 가 2일 때 model 예측하는 클래스
 class PimDegree2:
 
-    def __init__(self, up_rate=10, dp=0.1, scale=None):
-        if up_rate is None:
-            raise Exception("up_rate must not be None.")
+    def __init__(self, epoch=10000, dp=0.1, scale=None):
+        if epoch is None:
+            raise Exception("epoch must not be None.")
 
         if dp is None:
             raise Exception("dp must not be None.")
@@ -108,7 +104,7 @@ class PimDegree2:
         self.b = 0  # ax^2 + bx + c
         self.c = 0  # ax^2 + bx + c
         self.data = None  # X, y 데이터프레임
-        self.uprate = up_rate  # 증가량
+        self.epoch = epoch  # 반복횟수
         self.dp = dp  # 데이터 전처리 단위
         self.scale = scale + 1  # 데이터의 최대 소수점 자리수
         # 이차함수 그래프를 그릴 떄에는 scale 을 입력받았을 떄. 그 scale 에 +1 을 하여. 단위를 상승시킨다.
@@ -142,27 +138,37 @@ class PimDegree2:
         self.data = self.data.drop_duplicates(["y"], keep="first")
         self.data = self.data.reset_index(drop=True)
 
-        for i in range(self.data.shape[0]):
+        h = []
+        t = []
+
+        for i in range(self.epoch):
             try:
                 functions = Functions(scale=self.scale)
-                functions.add_func((self.data.iloc[i, 0], self.data.iloc[i, 1]))
-                functions.add_func((self.data.iloc[i + self.uprate, 0], self.data.iloc[i + self.uprate, 1]))
-                functions.add_func((self.data.iloc[i + self.uprate*2, 0], self.data.iloc[i + self.uprate*2, 1]))
-                functions.h()
-                functions.t()
-                up.append(functions.predict_func()[0])
+                funcs = self.data.sample(n=3)
+                funcs = sorted([xy for xy in list(zip(funcs.iloc[:, 0].tolist(), funcs.iloc[:, 1].tolist()))], key=lambda x: x[0])
+
+                for idx in range(3):
+                    functions.add_func(funcs[idx])
+
+                h.append(functions.h())
+                t.append(functions.t())
 
             except:
                 pass
 
-        for i in reversed(range(self.data.shape[0])):
+        h = sum(h) / len(h)
+        t = sum(t) / len(t)
+
+        for i in range(self.epoch):
             try:
-                functions = Functions(scale=self.scale)
-                functions.add_func((self.data.iloc[i, 0], self.data.iloc[i, 1]))
-                functions.add_func((self.data.iloc[i - self.uprate, 0], self.data.iloc[i - self.uprate, 1]))
-                functions.add_func((self.data.iloc[i - self.uprate * 2, 0], self.data.iloc[i - self.uprate * 2, 1]))
-                functions.h()
-                functions.t()
+                functions = Functions(h=h, scale=self.scale)
+                functions.increase = t
+                funcs = self.data.sample(n=3)
+                funcs = sorted([xy for xy in list(zip(funcs.iloc[:, 0].tolist(), funcs.iloc[:, 1].tolist()))], key=lambda x: x[0])
+
+                for idx in range(3):
+                    functions.add_func(funcs[idx])
+
                 up.append(functions.predict_func()[0])
 
             except:
@@ -186,7 +192,7 @@ class PimDegree2:
         y_pred = []
 
         for i in X:
-            y_pred.append((self.a * i ** 2) + (self.b * i) + self.c)
+            y_pred.append((self.a * (i ** 2)) + (self.b * i) + self.c)
 
         return y_pred
 
@@ -194,8 +200,10 @@ class PimDegree2:
     def info(self, ifpr=True):
         if ifpr:
             print(f"y = {self.a}x^2 + ({self.b}x) + ({self.c})")
+
         return self.a, self.b, self.c
 
+    # 평가
     def evaluation_graph(self, X, y):
         plt.scatter(X, y, label="original")
         plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
@@ -211,9 +219,7 @@ class PimDegree2:
 
 # PimDegree1 과 PimDegree2 를 상속받아 융합한다.
 class PimLinearRegression:
-    def __init__(self, up_rate=10, dp=0.1, scale=None, degree=None):
-        if up_rate is None:
-            raise Exception("up_rate must not be None.")
+    def __init__(self, dp=0.1, scale=None, degree=None, epoch=None):
 
         if dp is None:
             raise Exception("dp must not be None.")
@@ -224,11 +230,17 @@ class PimLinearRegression:
         if degree == 2 and scale is None:
             raise Exception("scale must not be None.")
 
+        if epoch is None:
+            raise Exception("epoch must not be None.")
+
         if degree == 1:
-            self.model = PimDegree1(up_rate=up_rate, dp=dp)
+            self.model = PimDegree1(epoch=epoch, dp=dp)
 
         if degree == 2:
-            self.model = PimDegree2(up_rate=up_rate, dp=dp, scale=scale)
+            if epoch < 1000:
+                raise Exception("epoch must not be smaller than 1000")
+
+            self.model = PimDegree2(epoch=epoch, dp=dp, scale=scale)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -253,3 +265,37 @@ class PimLinearRegression:
 
     def evaluation_graph(self, X, y):
         self.model.evaluation_graph(X, y)
+
+
+if __name__ == '__main__':
+
+    # degree = 1
+    pimDegree1 = PimLinearRegression(epoch=1000, dp=0.1, degree=1)
+    X = 2 * np.random.rand(100, 1)
+    y = 6 + 4 * X+np.random.randn(100, 1)
+
+    X = np.ravel(X, order="C")
+    y = np.ravel(y, order="C")
+
+    pimDegree1.fit(X, y)
+    pimDegree1.evaluation_graph(X, y)
+
+    # degree 2
+    epochs = [5000]
+    # epochs.extend([1000, 5000, 10000, 20000, 30000, 40000, 50000])
+
+    for i in epochs:
+        pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2, scale=3)
+
+        # data x, y
+        X = np.round(2 * np.random.rand(100, 1), 3)
+        y = np.round((2 * (X ** 2)) + (5 * X) + np.round(np.random.randn(100, 1), 4), 4)
+
+        X = np.ravel(X, order="C")
+        y = np.ravel(y, order="C")
+
+        # fit
+        pimDegree2.fit(X, y)
+        print(pimDegree2.info())
+        plt.title(i)
+        pimDegree2.evaluation_graph(X, y)
