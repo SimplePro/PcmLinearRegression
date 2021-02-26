@@ -9,3 +9,9 @@ Test
 ![image](https://user-images.githubusercontent.com/66504341/107452558-c46cf300-6b8c-11eb-8d44-ebbf67b0ab53.png)
 
 ##### Difference: 0.0010410047854031435
+
+
+
+Derivative Pattern
+----------
+https://github.com/SimplePro/second-derivative-pattern/
