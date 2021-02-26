@@ -291,6 +291,9 @@ if __name__ == '__main__':
 
         # data x, y
         X = np.round(6 * np.random.rand(100, 1) - 3, 3)
+
+        # 노이즈를 제거하면 정말잘 예측한다. 노이즈를 포함하고 어떻게 잘 예측할지가 중요하다.
+        # derivative_pattern module file 쪽에서 수정할 부분은 없어보임. PimDegree2 에서 로직을 수정해보는 방향으로 해야할 것 같음.
         y = 0.5 * X ** 2 + X + 2 + np.random.randn(100, 1)
 
         X = np.ravel(X, order="C")
