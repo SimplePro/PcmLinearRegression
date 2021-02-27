@@ -14,11 +14,11 @@ Test Degree 2
 --------
 #### PimLinearRegression
 ##### RMSE: 0.9596976422426643
-![image](https://user-images.githubusercontent.com/66504341/109371984-9f95b100-78ea-11eb-834d-f84f2ddf2018.png)  
+![image](https://user-images.githubusercontent.com/66504341/109372072-e5eb1000-78ea-11eb-9756-42c27b37125f.png)
 
 #### Sklearn LinearRegression
 ##### RMSE: 0.936122861830337
-![image](https://user-images.githubusercontent.com/66504341/109371994-a58b9200-78ea-11eb-8280-5d1330ef1a83.png)
+![image](https://user-images.githubusercontent.com/66504341/109372080-eb485a80-78ea-11eb-8847-c80ac8f2158f.png)
 
 ##### Difference: 0.0235747804123273=
 
