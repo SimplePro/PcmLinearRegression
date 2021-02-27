@@ -159,8 +159,6 @@ class PimDegree2:
         h = sum(h) / len(h)
         t = sum(t) / len(t)
 
-        print(h, t)
-
         for i in range(self.epoch):
             try:
                 functions = Functions(h=h, scale=self.scale)
