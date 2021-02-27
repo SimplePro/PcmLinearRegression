@@ -20,7 +20,7 @@ Test Degree 2
 ##### RMSE: 0.936122861830337
 ![image](https://user-images.githubusercontent.com/66504341/109372080-eb485a80-78ea-11eb-8847-c80ac8f2158f.png)
 
-##### Difference: 0.0235747804123273=
+##### Difference: 0.0235747804123273
 
 Derivative Pattern
 ----------
