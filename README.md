@@ -75,8 +75,7 @@ def predict(self, X):
     return y_pred
 ```
 
-다음과 같이 사용할 수 있다
---------------------
+#### 다음과 같이 사용할 수 있다
 ``` python
 # 임포트
 from CustomML.CustomRegression import PimLinearRegression
@@ -204,8 +203,7 @@ def predict(self, X):
     return y_pred
 ```
 
-다음과 같이 사용할 수 있다
---------------------
+#### 다음과 같이 사용할 수 있다
 ``` python
 # 임포트
 from CustomML.CustomRegression import PimLinearRegression
