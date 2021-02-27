@@ -62,7 +62,7 @@ def evaluation_graph(self, X, y):
 ```
 
 <div>
-<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/106843303-12937980-66e9-11eb-9903-37af7c4ab149.png"></img>
+<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/109374688-6d8c4b00-78fa-11eb-8c4c-0996eeddc4a9.png"></img>
 </div>
 
 #### 5. 예측은 predict 메소드를 이용하여 할 수 있다.
@@ -188,7 +188,7 @@ def evaluation_graph(self, X, y):
 ```
 
 <div>
-<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/106843303-12937980-66e9-11eb-9903-37af7c4ab149.png"></img>
+<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/109374719-9a406280-78fa-11eb-9670-d27823022b23.png"></img>
 </div>
 
 #### 5. 예측은 predict 메소드를 이용하여 할 수 있다.
