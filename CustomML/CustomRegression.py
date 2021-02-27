@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from derivative_pattern import Functions
 
-# 학습 로직
-# 1. random 하게 데이터를 선택하고 계수를 예측한다. 이 과정을 epoch 만큼 반복
-# 2. 나온 계수들의 평균을 구한다.
 
 # degree 가 1일 때 model 예측하는 클래스
 class PimDegree1:
@@ -288,8 +285,8 @@ if __name__ == '__main__':
         pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2, scale=3)
 
         # data x, y
-        X = np.round(5 * np.random.randn(100, 1), 3)
-        y = (4 * X ** 2) + X - 20 + (23 * np.random.randn(100, 1))
+        X = np.round(np.random.randn(100, 1), 3)
+        y = (4 * X ** 2) + X + 3 + (2.5*np.random.randn(100, 1))
 
         X = np.ravel(X, order="C")
         y = np.ravel(y, order="C")
