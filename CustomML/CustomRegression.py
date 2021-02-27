@@ -159,6 +159,8 @@ class PimDegree2:
         h = sum(h) / len(h)
         t = sum(t) / len(t)
 
+        print(h, t)
+
         for i in range(self.epoch):
             try:
                 functions = Functions(h=h, scale=self.scale)
@@ -209,9 +211,7 @@ class PimDegree2:
         plt.scatter(self.data.iloc[:, 0], self.data.iloc[:, 1], color="red", label="preprocessing")
 
         pred = self.predict(self.data.iloc[:, 0])
-        # pred_argsort = np.argsort(pred)
         argsort = np.argsort(self.data.iloc[:, 0].tolist())
-        print(self.data.iloc[:, 0][argsort].tolist(), "\n", np.array(pred)[argsort])
         plt.plot(self.data.iloc[:, 0][argsort].tolist(), np.array(pred)[argsort], color="yellow", label="predict", linewidth=3.0)
 
         plt.legend()
@@ -283,18 +283,15 @@ if __name__ == '__main__':
     pimDegree1.evaluation_graph(X, y)
 
     # degree 2
-    epochs = [10000, 20000]
+    epochs = [10000]
     # epochs.extend([1000, 5000, 10000, 20000, 30000, 40000, 50000])
 
     for i in epochs:
         pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2, scale=3)
 
         # data x, y
-        X = np.round(6 * np.random.rand(100, 1) - 3, 3)
-
-        # 노이즈를 제거하면 정말 잘 예측한다. 노이즈를 포함하고 어떻게 잘 예측하게 할지가 중요하다.
-        # derivative_pattern module file 쪽에서 수정할 부분은 없어보임. PimDegree2 에서 로직을 수정해보는 방향으로 해야할 것 같음.
-        y = 0.5 * X ** 2 + X + 2 + np.random.randn(100, 1)
+        X = np.round(5 * np.random.randn(100, 1), 3)
+        y = (4 * X ** 2) + X - 20 + (23 * np.random.randn(100, 1))
 
         X = np.ravel(X, order="C")
         y = np.ravel(y, order="C")
