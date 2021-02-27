@@ -1,4 +1,4 @@
-Test
+Test Degree 1
 ---------
 #### PimLinearRegression
 ##### RMSE: 0.8943351037707931
