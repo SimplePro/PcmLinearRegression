@@ -13,14 +13,14 @@ Test Degree 1
 Test Degree 2
 --------
 #### PimLinearRegression
-##### RMSE: 0.9596976422426643
-![image](https://user-images.githubusercontent.com/66504341/109372072-e5eb1000-78ea-11eb-9756-42c27b37125f.png)
+##### RMSE: 0.9513424263042568
+![image](https://user-images.githubusercontent.com/66504341/109407453-4c902c80-79c4-11eb-9021-0888eef5f1b1.png)
 
 #### Sklearn LinearRegression
 ##### RMSE: 0.936122861830337
-![image](https://user-images.githubusercontent.com/66504341/109372080-eb485a80-78ea-11eb-8847-c80ac8f2158f.png)
+![image](https://user-images.githubusercontent.com/66504341/109407456-50bc4a00-79c4-11eb-82db-2944a9f1f219.png)
 
-##### Difference: 0.0235747804123273
+##### Difference: 0.015219564473919811
 
 Derivative Pattern
 ----------
