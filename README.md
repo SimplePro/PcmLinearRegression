@@ -175,7 +175,7 @@ def evaluation_graph(self, X, y):
 ```
 
 <div>
-<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/109374719-9a406280-78fa-11eb-9670-d27823022b23.png"></img>
+<img width="900" height="600" src="https://user-images.githubusercontent.com/66504341/109407579-48b0da00-79c5-11eb-8583-66ac8a77c6c4.png"></img>
 </div>
 
 #### 5. 예측은 predict 메소드를 이용하여 할 수 있다.
