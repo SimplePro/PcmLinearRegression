@@ -133,38 +133,26 @@ class PimDegree2:
 
         self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
         self.data = self.data.drop_duplicates(["y"], keep="first")
+        self.data = self.data.sort_values(by=["X"], axis=0)
         self.data = self.data.reset_index(drop=True)
 
-        h = []
-        t = []
+        zone_unit = self.data.shape[0] // 3   # 구역 단위
+        # 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
+
+        data1 = self.data.iloc[0:zone_unit, :]  # 구역 1
+        data2 = self.data.iloc[zone_unit:zone_unit*2, :]  # 구역 2
+        data3 = self.data.iloc[zone_unit*2:, :]  # 구역 3
 
         for i in range(self.epoch):
             try:
                 functions = Functions(scale=self.scale)
-                funcs = self.data.sample(n=3)
-                funcs = sorted([xy for xy in list(zip(funcs.iloc[:, 0].tolist(), funcs.iloc[:, 1].tolist()))], key=lambda x: x[0])
+                func1 = data1.sample(n=1)
+                func2 = data2.sample(n=1)
+                func3 = data3.sample(n=1)
+                funcs = [func1.iloc[0, :].tolist(), func2.iloc[0, :].tolist(), func3.iloc[0, :].tolist()]
 
-                for idx in range(3):
-                    functions.add_func(funcs[idx])
-
-                h.append(functions.h())
-                t.append(functions.t())
-
-            except:
-                pass
-
-        h = sum(h) / len(h)
-        t = sum(t) / len(t)
-
-        for i in range(self.epoch):
-            try:
-                functions = Functions(h=h, scale=self.scale)
-                functions.increase = t
-                funcs = self.data.sample(n=3)
-                funcs = sorted([xy for xy in list(zip(funcs.iloc[:, 0].tolist(), funcs.iloc[:, 1].tolist()))], key=lambda x: x[0])
-
-                for idx in range(3):
-                    functions.add_func(funcs[idx])
+                for x, y in funcs:
+                    functions.add_func((x, y))
 
                 up.append(functions.predict_func()[0])
 
@@ -286,7 +274,7 @@ if __name__ == '__main__':
 
         # data x, y
         X = np.round(np.random.randn(100, 1), 3)
-        y = (4 * X ** 2) + X + 3 + (2.5*np.random.randn(100, 1))
+        y = (-3 * X ** 2) + (3*X) + 3 + (2.5*np.random.randn(100, 1))
 
         X = np.ravel(X, order="C")
         y = np.ravel(y, order="C")
