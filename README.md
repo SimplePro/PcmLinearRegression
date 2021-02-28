@@ -75,6 +75,14 @@ def predict(self, X):
     return y_pred
 ```
 
+### PimLinearRegression Degree1 기술 정리
+|스텝|설명|
+|:---:|:---:|
+|1|x 값이 비슷한 데이터들끼리 평균 데이터를 구하여 전반적인 전처리를 한다.|
+|2|전처리한 데이터에서 샘플을 뽑아서 기울기들을 epoch 만큼 구하고, 평균을 내서 최종 기울기를 구한다.|
+|3|y 값과 예측값(기울기만을 이용한)의 차이의 평균으로 절편을 구할 수 있다.|
+|4|2 와 3을 이용해서 최종적인 모델을 예측해낸다.|
+
 #### 다음과 같이 사용할 수 있다
 ``` python
 # 임포트
@@ -104,6 +112,7 @@ def duplicate(x):
 
 self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
 self.data = self.data.drop_duplicates(["y"], keep="first")
+self.data = self.data.sort_values(by=["X"], axis=0)
 self.data = self.data.reset_index(drop=True)
 ```
 
@@ -149,7 +158,7 @@ self.b = sum(b) / len(b)
 self.c = sum(c) / len(c)
 ```
 
-#### 그렇게 y = ax^2 + bx + c 형태의 일차함수(LinearRegression) 그래프를 얻을 수 있다.
+#### 그렇게 y = ax^2 + bx + c 형태의 이차함수(LinearRegression) 그래프를 얻을 수 있다.
 ``` python
 # 정보
 def info(self, ifpr=True):
@@ -189,6 +198,14 @@ def predict(self, X):
 
     return y_pred
 ```
+
+### PimLinearRegression Degree2 기술 정리
+|스텝|설명|
+|:---:|:---:|
+|1|x 값이 비슷한 데이터들끼리 평균 데이터를 구하여 전반적인 전처리를 한다.|
+|2|샘플 데이터를 고르게 뽑기 위하여 데이터를 세개의 구역으로 나눈다.|
+|3|세 개의 샘플 데이터를 뽑아서 이차함수를 예측한다. (epoch 만큼 반복)|
+|4|3 에서 예측했던 함수들의 평균을 내서 최종 모델을 예측해낸다.|
 
 #### 다음과 같이 사용할 수 있다
 ``` python
