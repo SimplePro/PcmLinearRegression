@@ -87,15 +87,12 @@ class PimDegree1:
 # degree 가 2일 때 model 예측하는 클래스
 class PimDegree2:
 
-    def __init__(self, epoch=10000, dp=0.1, scale=None):
+    def __init__(self, epoch=10000, dp=0.1):
         if epoch is None:
             raise Exception("epoch must not be None.")
 
         if dp is None:
             raise Exception("dp must not be None.")
-
-        if scale is None:
-            raise Exception("scale must not be None.")
 
         self.a = 0  # ax^2 + bx + c
         self.b = 0  # ax^2 + bx + c
@@ -103,9 +100,6 @@ class PimDegree2:
         self.data = None  # X, y 데이터프레임
         self.epoch = epoch  # 반복횟수
         self.dp = dp  # 데이터 전처리 단위
-        self.scale = scale + 1  # 데이터의 최대 소수점 자리수
-        # 이차함수 그래프를 그릴 떄에는 scale 을 입력받았을 떄. 그 scale 에 +1 을 하여. 단위를 상승시킨다.
-        # (랜덤으로 점을 잡아서 이차함수를 예측할 때 scale 을 기준으로 2 이상 차이가 나야 하기 때문이다. scale 을 +1 로 잡으면 차이는 최소가 10으로 줄어들게 된다.)
 
     # 학습
     def fit(self, X, y):
@@ -136,16 +130,16 @@ class PimDegree2:
         self.data = self.data.sort_values(by=["X"], axis=0)
         self.data = self.data.reset_index(drop=True)
 
-        zone_unit = self.data.shape[0] // 3   # 구역 단위
+        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3   # 구역 단위
         # 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
 
-        data1 = self.data.iloc[0:zone_unit, :]  # 구역 1
-        data2 = self.data.iloc[zone_unit:zone_unit*2, :]  # 구역 2
-        data3 = self.data.iloc[zone_unit*2:, :]  # 구역 3
+        data1 = self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]  # 구역 1
+        data2 = self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit*2))]  # 구역 2
+        data3 = self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit*2)]  # 구역 3
 
         for i in range(self.epoch):
             try:
-                functions = Functions(scale=self.scale)
+                functions = Functions()
                 func1 = data1.sample(n=1)
                 func2 = data2.sample(n=1)
                 func3 = data3.sample(n=1)
@@ -204,16 +198,13 @@ class PimDegree2:
 
 # PimDegree1 과 PimDegree2 를 상속받아 융합한다.
 class PimLinearRegression:
-    def __init__(self, dp=0.1, scale=None, degree=None, epoch=None):
+    def __init__(self, dp=0.1, degree=None, epoch=None):
 
         if dp is None:
             raise Exception("dp must not be None.")
 
         if degree is None:
             raise Exception("degree must not be None.")
-
-        if degree == 2 and scale is None:
-            raise Exception("scale must not be None.")
 
         if epoch is None:
             raise Exception("epoch must not be None.")
@@ -225,7 +216,7 @@ class PimLinearRegression:
             if epoch < 1000:
                 raise Exception("epoch must not be smaller than 1000")
 
-            self.model = PimDegree2(epoch=epoch, dp=dp, scale=scale)
+            self.model = PimDegree2(epoch=epoch, dp=dp)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -270,11 +261,11 @@ if __name__ == '__main__':
     # epochs.extend([1000, 5000, 10000, 20000, 30000, 40000, 50000])
 
     for i in epochs:
-        pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2, scale=3)
+        pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2)
 
         # data x, y
         X = np.round(np.random.randn(100, 1), 3)
-        y = (-3 * X ** 2) + (3*X) + 3 + (2.5*np.random.randn(100, 1))
+        y = (-3 * X ** 2) + (2*X) + 3 + (2.5*np.random.randn(100, 1))
 
         X = np.ravel(X, order="C")
         y = np.ravel(y, order="C")
