@@ -340,28 +340,32 @@ class Functions:
     # 원래의 이차함수 식을 예측하는 메소드.
     # f(x) = ax^2 + bx + c
     def predict_func(self):
-        mid_x = (self.func[1][0] + self.func[0][0]) / 2
-        mid_y = self.y(x=mid_x)[0]
+        if len(self.func) < 3:
+            mid_x = (self.func[1][0] + self.func[0][0]) / 2
+            mid_y = self.y(x=mid_x)[0]
 
-        if mid_x == 0:
-            mid_x = self.func[1][0] + 3
+            if mid_x == 0:
+                mid_x = self.func[1][0] + 3
 
-            first_x = self.func[0][0] - 1
-            first_y = self.y(x=first_x)[0]
-            data = [(first_x, first_y), (mid_x, mid_y), self.func[1]]
+                first_x = self.func[0][0] - 1
+                first_y = self.y(x=first_x)[0]
+                data = [(first_x, first_y), (mid_x, mid_y), self.func[1]]
 
-        elif self.func[0][0] == 0:
-            first_x = -1
-            first_y = self.y(x=first_x)[0]
-            data = [(first_x, first_y), (mid_x, mid_y), self.func[1]]
+            elif self.func[0][0] == 0:
+                first_x = -1
+                first_y = self.y(x=first_x)[0]
+                data = [(first_x, first_y), (mid_x, mid_y), self.func[1]]
 
-        elif self.func[1][0] == 0:
-            last_x = 1
-            last_y = self.y(x=last_x)[0]
-            data = [self.func[0], (mid_x, mid_y), (last_x, last_y)]
+            elif self.func[1][0] == 0:
+                last_x = 1
+                last_y = self.y(x=last_x)[0]
+                data = [self.func[0], (mid_x, mid_y), (last_x, last_y)]
+
+            else:
+                data = [self.func[0], (mid_x, mid_y), self.func[1]]
 
         else:
-            data = [self.func[0], (mid_x, mid_y), self.func[1]]
+            data = [self.func[0], self.func[1], self.func[2]]
 
         coefficients = []  # 계수값들
         values = []  # y값
@@ -407,16 +411,16 @@ class Functions:
 
 
 if __name__ == '__main__':
-    # f(x) = 2x^2 + 5x
-    # f1 = (-3, 3)  # (x, f(x))
-    # f2 = (5, 75)  # (x, f(x))
-    f1 = (-11.3, 198.88)
-    f2 = (4.1, 54.12)
+    f1 = (0.011, 0.78115)
+    f2 = (1.128, 6.081385714285714)
+    f3 = (1.99, 17.021075)
 
-    functions = Functions(h=4, scale=1)  # h=이계도함수, scsle 정의
+    functions = Functions(scale=3)  # scale 정의
     functions.add_func(f1)  # 첫번째 함숫값 추가
     functions.add_func(f2)  # 두번째 함숫값 추가
+    functions.add_func(f3)  # 세번째 함숫값 추가
+    print(functions.h())  # 이계도함수 구하기
     print(functions.t())  # f(n+1) - f(n) = t. 증가량 구하기
     print(functions.y(x=10))  # f(10) 의 값이 반환됨. 함수식도 반환됨.
     print(functions.predict_func())  # ((x^2 의 계수, x 의 계수, 상수), 예측된 이차함수식) 을 반환함.
-    functions.extract_f(ran=range(-500, 501))  # x = -500 ~ 500 의 그래프를 반환함.
+    functions.extract_f(ran=range(-50, 51))  # x = -50 ~ 50 의 그래프를 반환함.
