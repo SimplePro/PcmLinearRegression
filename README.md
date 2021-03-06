@@ -98,14 +98,14 @@ lr_model.fit(heights, weights)
 lr_model.evaluation_graph(heights, weights)
 ```
 
-설명 (degree 2)
+설명 (degree 2 이상)
 ---------
-### PimLinearRegression Degree2 기술 정리
+### PimLinearRegression Degree2Up 기술 정리
 |스텝|설명|
 |:---:|:---:|
 |1|x 값이 비슷한 데이터들끼리 평균 데이터를 구하여 전반적인 전처리를 한다.|
-|2|샘플 데이터를 고르게 뽑기 위하여 데이터를 세개의 구역으로 나눈다.|
-|3|세 개의 샘플 데이터를 뽑아서 이차함수를 예측한다. (epoch 만큼 반복)|
+|2|샘플 데이터를 고르게 뽑기 위하여 데이터를 n+1개의 구역으로 나눈다.|
+|3|n+1개의 샘플 데이터를 뽑아서 n차함수를 예측한다. (epoch 만큼 반복)|
 |4|3 에서 예측했던 함수들의 평균을 내서 최종 모델을 예측해낸다.|
 
 
@@ -125,56 +125,49 @@ self.data = self.data.sort_values(by=["X"], axis=0)
 self.data = self.data.reset_index(drop=True)
 ```
 
-#### 2. 샘플 데이터를 뽑아서 함수를 예측할 때 고르게 샘플 데이터를 뽑기 위하여 데이터를 세개의 구역으로 나눈다.
+#### 2. 샘플 데이터를 뽑아서 함수를 예측할 때 고르게 샘플 데이터를 뽑기 위하여 데이터를 n+1개의 구역으로 나눈다.
 ``` python
-zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3   # 구역 단위
-# 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
+# degree 에 따라 유동적으로 구역 나누기
+zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / (self.degree+1)  # 구역 단위        
+zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]]
 
-data1 = self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]  # 구역 1
-data2 = self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit*2))]  # 구역 2
-data3 = self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit*2)]  # 구역 3
+for i in range(2, self.degree+1):
+    zones.append(self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * (i-1))) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit * i))])
+
+zones.append(self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * self.degree)])
 ```
 
-#### 3. 세 개의 샘플 데이터를 뽑아서 함수들을 예측한다. (epoch 만큼 반복)
+#### 3. n+1 개의 샘플 데이터를 뽑아서 함수들을 예측한다. (epoch 만큼 반복)
 ``` python
 for i in range(self.epoch):
     try:
         functions = Functions()
-        func1 = data1.sample(n=1)
-        func2 = data2.sample(n=1)
-        func3 = data3.sample(n=1)
-        funcs = [func1.iloc[0, :].tolist(), func2.iloc[0, :].tolist(), func3.iloc[0, :].tolist()]
+        funcs = []
+
+        for idx in range(len(zones)):
+            funcs.append(zones[idx].sample(n=1).iloc[0, :].tolist())
 
         for x, y in funcs:
             functions.add_func((x, y))
 
-        up.append(functions.predict_func()[0])
+        up.append(functions.predict_func())
 
     except:
         pass
 
-a = []
-b = []
-c = []
-
 for i in up:
-    a.append(i["a"])
-    b.append(i["b"])
-    c.append(i["c"])
+    for j in range(len(i)):
+        self.coefficients[j].append(i[j])
 
-self.a = sum(a) / len(a)
-self.b = sum(b) / len(b)
-self.c = sum(c) / len(c)
+for i in range(len(self.coefficients)):
+    self.coefficients[i] = sum(self.coefficients[i]) / len(self.coefficients[i])
 ```
 
-#### 그렇게 y = ax^2 + bx + c 형태의 이차함수(LinearRegression) 그래프를 얻을 수 있다.
+#### n차함수(LinearRegression) 그래프를 얻을 수 있다.
 ``` python
 # 정보
-def info(self, ifpr=True):
-    if ifpr:
-    print(f"y = {self.a}x^2 + ({self.b}x) + ({self.c})")
-
-    return self.a, self.b, self.c
+def info(self):
+    return self.coefficients
 ```
 
 #### 4. X 값과 y 값으로 평가 그래프를 그릴 수 있다.
@@ -203,7 +196,11 @@ def predict(self, X):
     y_pred = []
 
     for i in X:
-        y_pred.append((self.a * (i ** 2)) + (self.b * i) + self.c)
+        result = 0
+        for idx, coe in enumerate(self.coefficients):
+            result += coe * (i ** (len(self.coefficients) - idx - 1))
+
+        y_pred.append(result)
 
     return y_pred
 ```
@@ -276,7 +273,8 @@ class PimDegree1:
 
         for i in range(self.epoch):
             sample_xy = self.data.sample(n=2)
-            sample_xy = sorted([xy for xy in list(zip(sample_xy.iloc[:, 0].tolist(), sample_xy.iloc[:, 1].tolist()))], key=lambda x: x[0])
+            sample_xy = sorted([xy for xy in list(zip(sample_xy.iloc[:, 0].tolist(), sample_xy.iloc[:, 1].tolist()))],
+                               key=lambda x: x[0])
             up.append((sample_xy[0][1] - sample_xy[1][1]) / (sample_xy[0][0] - sample_xy[1][0]))
 
         # 기울기 구하기
@@ -312,22 +310,22 @@ class PimDegree1:
         plt.show()
 
 
-# degree 가 2일 때 model 예측하는 클래스
-class PimDegree2:
+# degree 가 2 이상일 때 model 예측하는 클래스
+class PimDegree2Up:
 
-    def __init__(self, epoch=10000, dp=0.1):
+    def __init__(self, epoch=10000, dp=0.1, degree=2):
         if epoch is None:
             raise Exception("epoch must not be None.")
 
         if dp is None:
             raise Exception("dp must not be None.")
 
-        self.a = 0  # ax^2 + bx + c
-        self.b = 0  # ax^2 + bx + c
-        self.c = 0  # ax^2 + bx + c
         self.data = None  # X, y 데이터프레임
         self.epoch = epoch  # 반복횟수
         self.dp = dp  # 데이터 전처리 단위
+
+        self.degree = degree  # 차수
+        self.coefficients = [[] for _ in range(self.degree+1)]  # 함수의 계수들. 차수가 높은 순으로 나열함.
 
     # 학습
     def fit(self, X, y):
@@ -358,57 +356,54 @@ class PimDegree2:
         self.data = self.data.sort_values(by=["X"], axis=0)
         self.data = self.data.reset_index(drop=True)
 
-        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3   # 구역 단위
-        # 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
-
-        data1 = self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]  # 구역 1
-        data2 = self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit*2))]  # 구역 2
-        data3 = self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit*2)]  # 구역 3
+        # degree 에 따라 유동적으로 구역 나누기
+        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / (self.degree+1)  # 구역 단위        
+        zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]]
+        
+        for i in range(2, self.degree+1):
+            zones.append(self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * (i-1))) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit * i))])
+            
+        zones.append(self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * self.degree)])
 
         for i in range(self.epoch):
             try:
                 functions = Functions()
-                func1 = data1.sample(n=1)
-                func2 = data2.sample(n=1)
-                func3 = data3.sample(n=1)
-                funcs = [func1.iloc[0, :].tolist(), func2.iloc[0, :].tolist(), func3.iloc[0, :].tolist()]
+                funcs = []
+
+                for idx in range(len(zones)):
+                    funcs.append(zones[idx].sample(n=1).iloc[0, :].tolist())
 
                 for x, y in funcs:
                     functions.add_func((x, y))
 
-                up.append(functions.predict_func()[0])
+                up.append(functions.predict_func())
 
             except:
                 pass
 
-        a = []
-        b = []
-        c = []
-
         for i in up:
-            a.append(i["a"])
-            b.append(i["b"])
-            c.append(i["c"])
+            for j in range(len(i)):
+                self.coefficients[j].append(i[j])
 
-        self.a = sum(a) / len(a)
-        self.b = sum(b) / len(b)
-        self.c = sum(c) / len(c)
+        for i in range(len(self.coefficients)):
+            self.coefficients[i] = sum(self.coefficients[i]) / len(self.coefficients[i])
 
     # 예측
     def predict(self, X):
         y_pred = []
 
         for i in X:
-            y_pred.append((self.a * (i ** 2)) + (self.b * i) + self.c)
+            result = 0
+            for idx, coe in enumerate(self.coefficients):
+                result += coe * (i ** (len(self.coefficients) - idx - 1))
+
+            y_pred.append(result)
 
         return y_pred
 
     # 정보
-    def info(self, ifpr=True):
-        if ifpr:
-            print(f"y = {self.a}x^2 + ({self.b}x) + ({self.c})")
-
-        return self.a, self.b, self.c
+    def info(self):
+        return self.coefficients
 
     # 평가
     def evaluation_graph(self, X, y):
@@ -417,7 +412,8 @@ class PimDegree2:
 
         pred = self.predict(self.data.iloc[:, 0])
         argsort = np.argsort(self.data.iloc[:, 0].tolist())
-        plt.plot(self.data.iloc[:, 0][argsort].tolist(), np.array(pred)[argsort], color="yellow", label="predict", linewidth=3.0)
+        plt.plot(self.data.iloc[:, 0][argsort].tolist(), np.array(pred)[argsort], color="yellow", label="predict",
+                 linewidth=3.0)
 
         plt.legend()
 
@@ -440,11 +436,11 @@ class PimLinearRegression:
         if degree == 1:
             self.model = PimDegree1(epoch=epoch, dp=dp)
 
-        if degree == 2:
+        elif degree >= 2:
             if epoch < 1000:
                 raise Exception("epoch must not be smaller than 1000")
 
-            self.model = PimDegree2(epoch=epoch, dp=dp)
+            self.model = PimDegree2Up(epoch=epoch, dp=dp, degree=degree)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -464,8 +460,8 @@ class PimLinearRegression:
         return self.model.predict(X)
 
     # 정보
-    def info(self, ifpr=True):
-        return self.model.info(ifpr=ifpr)
+    def info(self):
+        return self.model.info()
 
     def evaluation_graph(self, X, y):
         self.model.evaluation_graph(X, y)
@@ -476,7 +472,7 @@ if __name__ == '__main__':
     # degree = 1
     pimDegree1 = PimLinearRegression(epoch=1000, dp=0.1, degree=1)
     X = 2 * np.random.rand(100, 1)
-    y = 6 + 4 * X+np.random.randn(100, 1)
+    y = 6 + 4 * X + np.random.randn(100, 1)
 
     X = np.ravel(X, order="C")
     y = np.ravel(y, order="C")
@@ -485,24 +481,20 @@ if __name__ == '__main__':
     pimDegree1.evaluation_graph(X, y)
 
     # degree 2
-    epochs = [10000]
-    # epochs.extend([1000, 5000, 10000, 20000, 30000, 40000, 50000])
+    pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
 
-    for i in epochs:
-        pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2)
+    # data x, y
+    X = np.round(np.random.randn(100, 1), 3)
+    y = (2 * X ** 2) + (2 * X) + 3 + (2.5 * np.random.randn(100, 1))
 
-        # data x, y
-        X = np.round(np.random.randn(100, 1), 3)
-        y = (-3 * X ** 2) + (2*X) + 3 + (2.5*np.random.randn(100, 1))
+    X = X.reshape(X.shape[0], )
+    y = y.reshape(y.shape[0], )
 
-        X = np.ravel(X, order="C")
-        y = np.ravel(y, order="C")
-
-        # fit
-        pimDegree2.fit(X, y)
-        print(pimDegree2.info())
-        plt.title(i)
-        pimDegree2.evaluation_graph(X, y)
+    # fit
+    pimDegree2.fit(X, y)
+    print(pimDegree2.info())
+    plt.title(10000)
+    pimDegree2.evaluation_graph(X, y)
 
 
 ```
