@@ -86,21 +86,21 @@ class PimDegree1:
 
 
 # degree 가 2일 때 model 예측하는 클래스
-class PimDegree2:
+class PimDegree2Up:
 
-    def __init__(self, epoch=10000, dp=0.1):
+    def __init__(self, epoch=10000, dp=0.1, degree=2):
         if epoch is None:
             raise Exception("epoch must not be None.")
 
         if dp is None:
             raise Exception("dp must not be None.")
 
-        self.a = 0  # ax^2 + bx + c
-        self.b = 0  # ax^2 + bx + c
-        self.c = 0  # ax^2 + bx + c
         self.data = None  # X, y 데이터프레임
         self.epoch = epoch  # 반복횟수
         self.dp = dp  # 데이터 전처리 단위
+
+        self.degree = degree  # 차수
+        self.coefficients = [[] for _ in range(self.degree+1)]  # 함수의 계수들. 차수가 높은 순으로 나열함.
 
     # 학습
     def fit(self, X, y):
@@ -131,17 +131,7 @@ class PimDegree2:
         self.data = self.data.sort_values(by=["X"], axis=0)
         self.data = self.data.reset_index(drop=True)
 
-        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3  # 구역 단위
-        # 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
-
-        zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)],  # 구역 1
-                 self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (
-                             self.data["X"] < (self.data.iloc[0, 0] + zone_unit * 2))],  # 구역 2
-                 self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * 2)]  # 구역 3
-                 ]
-
         # degree 에 따라 유동적으로 구역 나누기
-        """
         zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / (self.degree+1)  # 구역 단위        
         zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]]
         
@@ -149,7 +139,6 @@ class PimDegree2:
             zones.append(self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * (i-1))) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit * i))])
             
         zones.append(self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * self.degree)])
-        """
 
         for i in range(self.epoch):
             try:
@@ -162,39 +151,34 @@ class PimDegree2:
                 for x, y in funcs:
                     functions.add_func((x, y))
 
-                up.append(functions.predict_func()[0])
+                up.append(functions.predict_func())
 
             except:
                 pass
 
-        a = []
-        b = []
-        c = []
-
         for i in up:
-            a.append(i["a"])
-            b.append(i["b"])
-            c.append(i["c"])
+            for j in range(len(i)):
+                self.coefficients[j].append(i[j])
 
-        self.a = sum(a) / len(a)
-        self.b = sum(b) / len(b)
-        self.c = sum(c) / len(c)
+        for i in range(len(self.coefficients)):
+            self.coefficients[i] = sum(self.coefficients[i]) / len(self.coefficients[i])
 
     # 예측
     def predict(self, X):
         y_pred = []
 
         for i in X:
-            y_pred.append((self.a * (i ** 2)) + (self.b * i) + self.c)
+            result = 0
+            for idx, coe in enumerate(self.coefficients):
+                result += coe * (i ** (len(self.coefficients) - idx - 1))
+
+            y_pred.append(result)
 
         return y_pred
 
     # 정보
-    def info(self, ifpr=True):
-        if ifpr:
-            print(f"y = {self.a}x^2 + ({self.b}x) + ({self.c})")
-
-        return self.a, self.b, self.c
+    def info(self):
+        return self.coefficients
 
     # 평가
     def evaluation_graph(self, X, y):
@@ -227,11 +211,11 @@ class PimLinearRegression:
         if degree == 1:
             self.model = PimDegree1(epoch=epoch, dp=dp)
 
-        if degree == 2:
+        elif degree >= 2:
             if epoch < 1000:
                 raise Exception("epoch must not be smaller than 1000")
 
-            self.model = PimDegree2(epoch=epoch, dp=dp)
+            self.model = PimDegree2Up(epoch=epoch, dp=dp, degree=degree)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -251,8 +235,8 @@ class PimLinearRegression:
         return self.model.predict(X)
 
     # 정보
-    def info(self, ifpr=True):
-        return self.model.info(ifpr=ifpr)
+    def info(self):
+        return self.model.info()
 
     def evaluation_graph(self, X, y):
         self.model.evaluation_graph(X, y)
@@ -272,21 +256,17 @@ if __name__ == '__main__':
     pimDegree1.evaluation_graph(X, y)
 
     # degree 2
-    epochs = [10000]
-    # epochs.extend([1000, 5000, 10000, 20000, 30000, 40000, 50000])
+    pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
 
-    for i in epochs:
-        pimDegree2 = PimLinearRegression(epoch=i, dp=0.1, degree=2)
+    # data x, y
+    X = np.round(np.random.randn(100, 1), 3)
+    y = (2 * X ** 2) + (2 * X) + 3 + (2.5 * np.random.randn(100, 1))
 
-        # data x, y
-        X = np.round(np.random.randn(100, 1), 3)
-        y = (-2 * X ** 2) + (2 * X) + 3 + (3 * np.random.randn(100, 1))
+    X = X.reshape(X.shape[0], )
+    y = y.reshape(y.shape[0], )
 
-        X = np.ravel(X, order="C")
-        y = np.ravel(y, order="C")
-
-        # fit
-        pimDegree2.fit(X, y)
-        print(pimDegree2.info())
-        plt.title(i)
-        pimDegree2.evaluation_graph(X, y)
+    # fit
+    pimDegree2.fit(X, y)
+    print(pimDegree2.info())
+    plt.title(10000)
+    pimDegree2.evaluation_graph(X, y)
