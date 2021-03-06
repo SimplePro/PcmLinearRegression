@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from derivative_pattern import Functions
+from functions_module import Functions
 
 
 # degree 가 1일 때 model 예측하는 클래스
