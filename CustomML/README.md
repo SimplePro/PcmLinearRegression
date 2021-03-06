@@ -21,7 +21,3 @@ Test Degree 2
 ![image](https://user-images.githubusercontent.com/66504341/109407456-50bc4a00-79c4-11eb-82db-2944a9f1f219.png)
 
 ##### Difference: 0.011014915380436197
-
-Derivative Pattern
-----------
-https://github.com/SimplePro/second-derivative-pattern/
