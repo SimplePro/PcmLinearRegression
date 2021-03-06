@@ -255,12 +255,15 @@ if __name__ == '__main__':
     pimDegree1.fit(X, y)
     pimDegree1.evaluation_graph(X, y)
 
+    np.random.seed(49)
+
     # degree 2
     pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
 
     # data x, y
-    X = np.round(np.random.randn(100, 1), 3)
-    y = (2 * X ** 2) + (2 * X) + 3 + (2.5 * np.random.randn(100, 1))
+    np.random.seed(1)
+    X = np.round(6 * np.random.rand(100, 1) - 3, 3)
+    y = 0.5 * X ** 2 + X + 2 + np.random.randn(100, 1)
 
     X = X.reshape(X.shape[0], )
     y = y.reshape(y.shape[0], )
