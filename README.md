@@ -226,7 +226,7 @@ pimDegree2.evaluation_graph(X, y)
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from derivative_pattern import Functions
+from functions_module import Functions
 
 
 # degree 가 1일 때 model 예측하는 클래스
@@ -420,7 +420,7 @@ class PimDegree2Up:
         plt.show()
 
 
-# PimDegree1 과 PimDegree2 를 상속받아 융합한다.
+# PimDegree1 과 PimDegree2Up 를 융합한다.
 class PimLinearRegression:
     def __init__(self, dp=0.1, degree=None, epoch=None):
 
@@ -480,12 +480,15 @@ if __name__ == '__main__':
     pimDegree1.fit(X, y)
     pimDegree1.evaluation_graph(X, y)
 
+    np.random.seed(49)
+
     # degree 2
     pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
 
     # data x, y
-    X = np.round(np.random.randn(100, 1), 3)
-    y = (2 * X ** 2) + (2 * X) + 3 + (2.5 * np.random.randn(100, 1))
+    np.random.seed(1)
+    X = np.round(6 * np.random.rand(100, 1) - 3, 3)
+    y = 0.5 * X ** 2 + X + 2 + np.random.randn(100, 1)
 
     X = X.reshape(X.shape[0], )
     y = y.reshape(y.shape[0], )
@@ -495,6 +498,7 @@ if __name__ == '__main__':
     print(pimDegree2.info())
     plt.title(10000)
     pimDegree2.evaluation_graph(X, y)
+
 
 
 ```
