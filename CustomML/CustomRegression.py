@@ -48,7 +48,8 @@ class PimDegree1:
 
         for i in range(self.epoch):
             sample_xy = self.data.sample(n=2)
-            sample_xy = sorted([xy for xy in list(zip(sample_xy.iloc[:, 0].tolist(), sample_xy.iloc[:, 1].tolist()))], key=lambda x: x[0])
+            sample_xy = sorted([xy for xy in list(zip(sample_xy.iloc[:, 0].tolist(), sample_xy.iloc[:, 1].tolist()))],
+                               key=lambda x: x[0])
             up.append((sample_xy[0][1] - sample_xy[1][1]) / (sample_xy[0][0] - sample_xy[1][0]))
 
         # 기울기 구하기
@@ -130,20 +131,33 @@ class PimDegree2:
         self.data = self.data.sort_values(by=["X"], axis=0)
         self.data = self.data.reset_index(drop=True)
 
-        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3   # 구역 단위
+        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / 3  # 구역 단위
         # 데이터의 구역을 나누는 이유는 sample 3 개를 뽑았을 때에 비슷한 구역에서 3 개를 뽑아서 함수를 예측하게 되면 불필요한 함수가 예측될 수 있기 때문이다.
 
-        data1 = self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]  # 구역 1
-        data2 = self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit*2))]  # 구역 2
-        data3 = self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit*2)]  # 구역 3
+        zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)],  # 구역 1
+                 self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit)) & (
+                             self.data["X"] < (self.data.iloc[0, 0] + zone_unit * 2))],  # 구역 2
+                 self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * 2)]  # 구역 3
+                 ]
+
+        # degree 에 따라 유동적으로 구역 나누기
+        """
+        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / (self.degree+1)  # 구역 단위        
+        zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]]
+        
+        for i in range(2, self.degree+1):
+            zones.append(self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * (i-1))) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit * i))])
+            
+        zones.append(self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * self.degree)])
+        """
 
         for i in range(self.epoch):
             try:
                 functions = Functions()
-                func1 = data1.sample(n=1)
-                func2 = data2.sample(n=1)
-                func3 = data3.sample(n=1)
-                funcs = [func1.iloc[0, :].tolist(), func2.iloc[0, :].tolist(), func3.iloc[0, :].tolist()]
+                funcs = []
+
+                for idx in range(len(zones)):
+                    funcs.append(zones[idx].sample(n=1).iloc[0, :].tolist())
 
                 for x, y in funcs:
                     functions.add_func((x, y))
@@ -189,7 +203,8 @@ class PimDegree2:
 
         pred = self.predict(self.data.iloc[:, 0])
         argsort = np.argsort(self.data.iloc[:, 0].tolist())
-        plt.plot(self.data.iloc[:, 0][argsort].tolist(), np.array(pred)[argsort], color="yellow", label="predict", linewidth=3.0)
+        plt.plot(self.data.iloc[:, 0][argsort].tolist(), np.array(pred)[argsort], color="yellow", label="predict",
+                 linewidth=3.0)
 
         plt.legend()
 
@@ -248,7 +263,7 @@ if __name__ == '__main__':
     # degree = 1
     pimDegree1 = PimLinearRegression(epoch=1000, dp=0.1, degree=1)
     X = 2 * np.random.rand(100, 1)
-    y = 6 + 4 * X+np.random.randn(100, 1)
+    y = 6 + 4 * X + np.random.randn(100, 1)
 
     X = np.ravel(X, order="C")
     y = np.ravel(y, order="C")
@@ -265,7 +280,7 @@ if __name__ == '__main__':
 
         # data x, y
         X = np.round(np.random.randn(100, 1), 3)
-        y = (-3 * X ** 2) + (2*X) + 3 + (2.5*np.random.randn(100, 1))
+        y = (-2 * X ** 2) + (2 * X) + 3 + (3 * np.random.randn(100, 1))
 
         X = np.ravel(X, order="C")
         y = np.ravel(y, order="C")
