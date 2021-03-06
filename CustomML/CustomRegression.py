@@ -85,7 +85,7 @@ class PimDegree1:
         plt.show()
 
 
-# degree 가 2일 때 model 예측하는 클래스
+# degree 가 2 이상일 때 model 예측하는 클래스
 class PimDegree2Up:
 
     def __init__(self, epoch=10000, dp=0.1, degree=2):
@@ -195,7 +195,7 @@ class PimDegree2Up:
         plt.show()
 
 
-# PimDegree1 과 PimDegree2 를 상속받아 융합한다.
+# PimDegree1 과 PimDegree2Up 를 융합한다.
 class PimLinearRegression:
     def __init__(self, dp=0.1, degree=None, epoch=None):
 
