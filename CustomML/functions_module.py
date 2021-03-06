@@ -240,6 +240,11 @@ class Functions:
     # 원래의 이차함수 식을 예측하는 메소드.
     # f(x) = ax^2 + bx + c
     def predict_func(self):
+
+        """
+        degree 에 따라 유동적으로 함수를 예측할 수 있도록, n 차 연립방정식에 대한 메소드를 개발해야 한다.
+        """
+
         if len(self.func) < 3:
             mid_x = (self.func[1][0] + self.func[0][0]) / 2
             mid_y = self.y(x=mid_x)[0]
