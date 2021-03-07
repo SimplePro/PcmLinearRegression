@@ -257,19 +257,19 @@ if __name__ == '__main__':
 
     np.random.seed(49)
 
-    # degree 2
-    pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
+    # degree 5
+    pimDegree5 = PimLinearRegression(epoch=10000, dp=0.1, degree=5)
 
     # data x, y
     np.random.seed(1)
-    X = np.round(6 * np.random.rand(100, 1) - 3, 3)
-    y = 0.5 * X ** 2 + X + 2 + np.random.randn(100, 1)
+    X = np.round(6 * np.random.rand(200, 1) - 3, 3)
+    y = 0.5 * X ** 5 + X ** 3 + 12 + (30 * np.random.randn(200, 1))
 
     X = X.reshape(X.shape[0], )
     y = y.reshape(y.shape[0], )
 
     # fit
-    pimDegree2.fit(X, y)
-    print(pimDegree2.info())
+    pimDegree5.fit(X, y)
+    print(pimDegree5.info())
     plt.title(10000)
-    pimDegree2.evaluation_graph(X, y)
+    pimDegree5.evaluation_graph(X, y)
