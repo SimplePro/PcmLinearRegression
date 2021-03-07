@@ -5,7 +5,6 @@ class Functions:
 
     def __init__(self, scale=0):
         self.func = []  # 함숫값을 담는 변수
-        self.alphabet = [chr(c).lower() for c in range(ord('A'), ord('Z')+1)]
 
         if scale < 0:
             raise Exception("scale must not be smaller than 0")
