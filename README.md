@@ -1,8 +1,8 @@
-### PIM LinearRegression (Point Inclination Mean) - 점경사평균법
+### PCM LinearRegression (Point Coefficient Mean) - 점계수평균법
 -------------
 설명
 ---------
-### PimLinearRegression 기술 정리
+### PcmLinearRegression 기술 정리
 |스텝|설명|
 |:---:|:---:|
 |1|x 값이 비슷한 데이터들끼리 평균 데이터를 구하여 전반적인 전처리를 한다.|
@@ -107,9 +107,9 @@ def predict(self, X):
 #### 다음과 같이 사용할 수 있다
 ``` python
 # 임포트
-from CustomML.CustomRegression import PimLinearRegression
+from CustomML.CustomRegression import PcmLinearRegression
 
-pimDegree2 = PimLinearRegression(epoch=10000, dp=0.1, degree=2)
+pcmDegree2 = PcmLinearRegression(epoch=10000, dp=0.1, degree=2)
 
 # fit
 pimDegree2.fit(X, y)
@@ -128,8 +128,8 @@ import pandas as pd
 from functions_module import Functions
 
 
-# PimLinearRegression Logic class
-class PimLinearRegressionLogic:
+# PcmLinearRegression Logic class
+class PcmLinearRegressionLogic:
 
     def __init__(self, epoch=10000, dp=0.1, degree=1):
         if epoch is None:
@@ -160,7 +160,7 @@ class PimLinearRegressionLogic:
 
     # 학습 로직
     def fit_logic(self, X, y):
-        up = []  # 데이터마다 증가량에 따른 기울기를 담는 리스트.
+        all_coefficients = []  # 예측된 함수들의 계수를 담는 리스트.
 
         self.data = list(zip(X, y))
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
@@ -194,9 +194,9 @@ class PimLinearRegressionLogic:
             for x, y in funcs:
                 functions.add_func((x, y))
 
-            up.append(functions.predict_func())
+            all_coefficients.append(functions.predict_func())
 
-        for i in up:
+        for i in all_coefficients:
             for j in range(len(i)):
                 self.coefficients[j].append(i[j])
 
@@ -235,8 +235,8 @@ class PimLinearRegressionLogic:
         plt.show()
 
 
-# PimDegree1 과 PimDegree2Up 를 융합한다.
-class PimLinearRegression:
+# PcmLinearRegression
+class PcmLinearRegression:
     def __init__(self, dp=0.1, degree=None, epoch=None):
 
         if dp is None:
@@ -248,7 +248,7 @@ class PimLinearRegression:
         if epoch is None:
             raise Exception("epoch must not be None.")
 
-        self.model = PimLinearRegressionLogic(epoch=epoch, dp=dp, degree=degree)
+        self.model = PcmLinearRegressionLogic(epoch=epoch, dp=dp, degree=degree)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -278,20 +278,20 @@ class PimLinearRegression:
 if __name__ == '__main__':
 
     # degree = 1
-    pimDegree1 = PimLinearRegression(epoch=1000, dp=0.1, degree=1)
+    PcmDegree1 = PcmLinearRegression(epoch=1000, dp=0.1, degree=1)
     X = 2 * np.random.rand(100, 1)
     y = 6 + 4 * X + np.random.randn(100, 1)
 
     X = np.ravel(X, order="C")
     y = np.ravel(y, order="C")
 
-    pimDegree1.fit(X, y)
-    pimDegree1.evaluation_graph(X, y)
+    PcmDegree1.fit(X, y)
+    PcmDegree1.evaluation_graph(X, y)
 
     np.random.seed(49)
 
     # degree 5
-    pimDegree5 = PimLinearRegression(epoch=10000, dp=0.1, degree=5)
+    PcmDegree5 = PcmLinearRegression(epoch=10000, dp=0.1, degree=5)
 
     # data x, y
     np.random.seed(1)
@@ -302,10 +302,11 @@ if __name__ == '__main__':
     y = y.reshape(y.shape[0], )
 
     # fit
-    pimDegree5.fit(X, y)
-    print(pimDegree5.info())
+    PcmDegree5.fit(X, y)
+    print(PcmDegree5.info())
     plt.title(10000)
-    pimDegree5.evaluation_graph(X, y)
+    PcmDegree5.evaluation_graph(X, y)
+
 
 ```
 
