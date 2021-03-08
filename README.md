@@ -112,9 +112,9 @@ from CustomML.CustomRegression import PcmLinearRegression
 pcmDegree2 = PcmLinearRegression(epoch=10000, dp=0.1, degree=2)
 
 # fit
-pimDegree2.fit(X, y)
-print(pimDegree2.info())
-pimDegree2.evaluation_graph(X, y)
+pcmDegree2.fit(X, y)
+print(pcmDegree2.info())
+pcmDegree2.evaluation_graph(X, y)
 ```
 
 
