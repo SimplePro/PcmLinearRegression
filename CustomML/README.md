@@ -1,6 +1,6 @@
 Test Degree 1
 ---------
-#### PimLinearRegression
+#### PcmLinearRegression
 ##### RMSE: 1.0179020196481647
 ![image](https://user-images.githubusercontent.com/66504341/110303068-4beb3c00-803d-11eb-8ac7-13790f0cd1be.png)
 
@@ -12,7 +12,7 @@ Test Degree 1
 
 Test Degree 2
 --------
-#### PimLinearRegression
+#### PcmLinearRegression
 ##### RMSE: 0.8944538011505542
 ![image](https://user-images.githubusercontent.com/66504341/110304202-a3d67280-803e-11eb-8f62-249ea2e7a542.png)
 
