@@ -4,8 +4,8 @@ import pandas as pd
 from functions_module import Functions
 
 
-# PimLinearRegression Logic class
-class PimLinearRegressionLogic:
+# PcmLinearRegression Logic class
+class PcmLinearRegressionLogic:
 
     def __init__(self, epoch=10000, dp=0.1, degree=1):
         if epoch is None:
@@ -111,8 +111,8 @@ class PimLinearRegressionLogic:
         plt.show()
 
 
-# PimLinearRegression
-class PimLinearRegression:
+# PcmLinearRegression
+class PcmLinearRegression:
     def __init__(self, dp=0.1, degree=None, epoch=None):
 
         if dp is None:
@@ -124,7 +124,7 @@ class PimLinearRegression:
         if epoch is None:
             raise Exception("epoch must not be None.")
 
-        self.model = PimLinearRegressionLogic(epoch=epoch, dp=dp, degree=degree)
+        self.model = PcmLinearRegressionLogic(epoch=epoch, dp=dp, degree=degree)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -154,20 +154,20 @@ class PimLinearRegression:
 if __name__ == '__main__':
 
     # degree = 1
-    pimDegree1 = PimLinearRegression(epoch=1000, dp=0.1, degree=1)
+    PcmDegree1 = PcmLinearRegression(epoch=1000, dp=0.1, degree=1)
     X = 2 * np.random.rand(100, 1)
     y = 6 + 4 * X + np.random.randn(100, 1)
 
     X = np.ravel(X, order="C")
     y = np.ravel(y, order="C")
 
-    pimDegree1.fit(X, y)
-    pimDegree1.evaluation_graph(X, y)
+    PcmDegree1.fit(X, y)
+    PcmDegree1.evaluation_graph(X, y)
 
     np.random.seed(49)
 
     # degree 5
-    pimDegree5 = PimLinearRegression(epoch=10000, dp=0.1, degree=5)
+    PcmDegree5 = PcmLinearRegression(epoch=10000, dp=0.1, degree=5)
 
     # data x, y
     np.random.seed(1)
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     y = y.reshape(y.shape[0], )
 
     # fit
-    pimDegree5.fit(X, y)
-    print(pimDegree5.info())
+    PcmDegree5.fit(X, y)
+    print(PcmDegree5.info())
     plt.title(10000)
-    pimDegree5.evaluation_graph(X, y)
+    PcmDegree5.evaluation_graph(X, y)
