@@ -111,7 +111,7 @@ class PimLinearRegressionLogic:
         plt.show()
 
 
-# PimDegree1 과 PimDegree2Up 를 융합한다.
+# PimLinearRegression
 class PimLinearRegression:
     def __init__(self, dp=0.1, degree=None, epoch=None):
 
