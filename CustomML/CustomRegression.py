@@ -36,7 +36,7 @@ class PimLinearRegressionLogic:
 
     # 학습 로직
     def fit_logic(self, X, y):
-        up = []  # 데이터마다 증가량에 따른 기울기를 담는 리스트.
+        all_coefficients = []  # 예측된 함수들의 계수를 담는 리스트.
 
         self.data = list(zip(X, y))
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
@@ -70,9 +70,9 @@ class PimLinearRegressionLogic:
             for x, y in funcs:
                 functions.add_func((x, y))
 
-            up.append(functions.predict_func())
+            all_coefficients.append(functions.predict_func())
 
-        for i in up:
+        for i in all_coefficients:
             for j in range(len(i)):
                 self.coefficients[j].append(i[j])
 
