@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from functions_module import Functions
+from data_preprocessing import compression, zone
 
 
 # PcmLinearRegression Logic class
-class PcmLinearRegressionLogic:
+class PcmLinearRegressionLogicOneVariable:
 
     def __init__(self, epoch=10000, dp=0.1, degree=1):
         if epoch is None:
@@ -32,34 +33,18 @@ class PcmLinearRegressionLogic:
         if len(X) != len(y):
             raise Exception("X length and y length cannot be different")
 
-        self.fit_logic(X, y)
-
-    # 학습 로직
-    def fit_logic(self, X, y):
         all_coefficients = []  # 예측된 함수들의 계수를 담는 리스트.
 
         self.data = list(zip(X, y))
         self.data = pd.DataFrame(self.data, columns=["X", "y"])
 
-        def duplicate(x):
-            duplicate_data = self.data[(self.data["X"] > (x - self.dp)) & (self.data["X"] < (x + self.dp))]["y"]
-            return sum(duplicate_data) / len(duplicate_data)
+        # 데이터 압축
+        self.data = compression(data = self.data, dp = self.dp)
+        
+        # 구역 나누기
+        zones = zone(data=self.data, degree=self.degree)
 
-        self.data["y"] = self.data["X"].apply(lambda x: duplicate(x))
-        self.data = self.data.drop_duplicates(["y"], keep="first")
-        self.data = self.data.sort_values(by=["X"], axis=0)
-        self.data = self.data.reset_index(drop=True)
-
-        # degree 에 따라 유동적으로 구역 나누기
-        zone_unit = (self.data.iloc[-1, 0] - self.data.iloc[0, 0]) / (self.degree+1)  # 구역 단위
-        zones = [self.data[self.data["X"] < (self.data.iloc[0, 0] + zone_unit)]]
-
-        if self.degree >= 2:
-            for i in range(2, self.degree+1):
-                zones.append(self.data[(self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * (i-1))) & (self.data["X"] < (self.data.iloc[0, 0] + zone_unit * i))])
-
-        zones.append(self.data[self.data["X"] >= (self.data.iloc[0, 0] + zone_unit * self.degree)])
-
+        # 함수 식 예측
         for i in range(self.epoch):
             functions = Functions()
             funcs = []
@@ -124,7 +109,7 @@ class PcmLinearRegression:
         if epoch is None:
             raise Exception("epoch must not be None.")
 
-        self.model = PcmLinearRegressionLogic(epoch=epoch, dp=dp, degree=degree)
+        self.model = PcmLinearRegressionLogicOneVariable(epoch=epoch, dp=dp, degree=degree)
 
     # 학습
     def fit(self, X=None, y=None):
@@ -167,12 +152,12 @@ if __name__ == '__main__':
     np.random.seed(49)
 
     # degree 5
-    PcmDegree5 = PcmLinearRegression(epoch=10000, dp=0.1, degree=5)
+    PcmDegree5 = PcmLinearRegression(epoch=10000, dp=0.5, degree=5)
 
     # data x, y
     np.random.seed(1)
     X = np.round(6 * np.random.rand(200, 1) - 3, 3)
-    y = 0.5 * X ** 5 + X ** 3 + 12 + (30 * np.random.randn(200, 1))
+    y = X ** 5 - X + 12 + (40 * np.random.randn(200, 1))
 
     X = X.reshape(X.shape[0], )
     y = y.reshape(y.shape[0], )
@@ -180,5 +165,4 @@ if __name__ == '__main__':
     # fit
     PcmDegree5.fit(X, y)
     print(PcmDegree5.info())
-    plt.title(10000)
     PcmDegree5.evaluation_graph(X, y)
